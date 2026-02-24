@@ -176,14 +176,14 @@ const Input: React.FC<InputProps> = (props) => {
       <Box style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr', marginBottom }}>
         <TextInput ref={latRef} name="lat" placeholder="Latitude" />
         <TextInput ref={lngRef} name="lng" placeholder="Longitude" />
-        <Button variant="secondary" onClick={setLatLng} size="l">
+        <Button variant="secondary" onClick={setLatLng} size="L">
           Set Location
         </Button>
       </Box>
 
       <Box style={{ display: 'grid', gridTemplateColumns: '4fr 1fr', marginBottom }}>
         <TextInput ref={searchRef} name="search" placeholder="Address to search" />
-        <Button variant="secondary" onClick={searchLocation} size="l">
+        <Button variant="secondary" onClick={searchLocation} size="L">
           Search
         </Button>
       </Box>
