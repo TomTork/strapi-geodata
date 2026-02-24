@@ -91,11 +91,11 @@ const Input = (props) => {
     /* @__PURE__ */ jsxs(Box, { style: { display: "grid", gridTemplateColumns: "2fr 2fr 1fr", marginBottom }, children: [
       /* @__PURE__ */ jsx(TextInput, { ref: latRef, name: "lat", placeholder: "Latitude" }),
       /* @__PURE__ */ jsx(TextInput, { ref: lngRef, name: "lng", placeholder: "Longitude" }),
-      /* @__PURE__ */ jsx(Button, { variant: "secondary", onClick: setLatLng, size: "l", children: "Set Location" })
+      /* @__PURE__ */ jsx(Button, { variant: "secondary", onClick: setLatLng, size: "L", children: "Set Location" })
     ] }),
     /* @__PURE__ */ jsxs(Box, { style: { display: "grid", gridTemplateColumns: "4fr 1fr", marginBottom }, children: [
       /* @__PURE__ */ jsx(TextInput, { ref: searchRef, name: "search", placeholder: "Address to search" }),
-      /* @__PURE__ */ jsx(Button, { variant: "secondary", onClick: searchLocation, size: "l", children: "Search" })
+      /* @__PURE__ */ jsx(Button, { variant: "secondary", onClick: searchLocation, size: "L", children: "Search" })
     ] }),
     /* @__PURE__ */ jsx(Box, { style: { display: "flex", height: "300px", width: "100%", marginBottom }, children: /* @__PURE__ */ jsx(Box, { style: { width: "100% " }, children: /* @__PURE__ */ jsxs(
       MapContainer,
