@@ -17,20 +17,20 @@ import {
 
 import 'leaflet/dist/leaflet.css';
 
-
 const iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
-const iconRetinaUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
-const shadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
-
+const iconRetinaUrl =
+  'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
+const shadowUrl =
+  'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
 
 const customIcon = new L.Icon({
   iconUrl: iconUrl,
   iconRetinaUrl: iconRetinaUrl,
-  iconSize: [25, 41], 
-  iconAnchor: [12, 41], 
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
   popupAnchor: [0, -41],
   shadowUrl: shadowUrl,
-  shadowSize: [41, 41], 
+  shadowSize: [41, 41],
   shadowAnchor: [12, 41],
 });
 
@@ -52,16 +52,31 @@ const mapProps = {
   tileAccessToken: '',
 };
 
+// дефолт, чтобы никогда не отдать undefined/null в JSONInput и в рендер карты
+const DEFAULT_LOCATION: any = { lat: null, lng: null };
+
 const Input: React.FC<InputProps> = (props) => {
   const [map, setMap] = useState<any>(null);
-  const [location, setLocation] = useState<any>(props.value);
+
+  // props.value может быть undefined/null на новых/пустых формах
+  const safeValue: any = props?.value ?? DEFAULT_LOCATION;
+
+  // локальное состояние тоже всегда держим объектом (не undefined)
+  const [location, setLocation] = useState<any>(safeValue);
 
   const latRef = useRef<HTMLInputElement>(null);
   const lngRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
+  // если Strapi позже подгрузил value (редактирование/инициализация формы) — синхронизируем
+  useEffect(() => {
+    setLocation(props?.value ?? DEFAULT_LOCATION);
+  }, [props?.value]);
+
   const onMapClick = useCallback(
     (e: LeafletMouseEvent) => {
+      // e.latlng всегда есть, но пусть будет безопасно
+      if (!e?.latlng) return;
       setLocation(e.latlng);
     },
     [map]
@@ -76,6 +91,9 @@ const Input: React.FC<InputProps> = (props) => {
   }, [map, onMapClick]);
 
   useEffect(() => {
+    // не отправляем undefined/null в форму
+    if (!location) return;
+
     props.onChange({
       target: {
         name: props.name,
@@ -87,26 +105,40 @@ const Input: React.FC<InputProps> = (props) => {
 
   async function searchLocation(e: React.MouseEvent) {
     let search = searchRef.current?.value;
+
+    // пустой поиск — ничего не делаем
+    if (!search || !search.trim()) return;
+
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${search}&format=json`
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+        search
+      )}&format=json`
     );
     const data = await response.json();
-    if (data.length > 0) {
+
+    if (Array.isArray(data) && data.length > 0) {
       let lat = parseFloat(data[0].lat);
       let lng = parseFloat(data[0].lon);
-      setLocation({ lat, lng });
-      map.panTo({ lat, lng });
+
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        setLocation({ lat, lng });
+        if (map) map.panTo({ lat, lng });
+      }
     }
   }
 
   async function setLatLng() {
     let lat: any = latRef.current?.value;
     let lng: any = lngRef.current?.value;
+
     if (lat && lng) {
       lat = parseFloat(lat);
       lng = parseFloat(lng);
-      setLocation({ lat, lng });
-      map.panTo({ lat, lng });
+
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        setLocation({ lat, lng });
+        if (map) map.panTo({ lat, lng });
+      }
     }
   }
 
@@ -119,11 +151,21 @@ const Input: React.FC<InputProps> = (props) => {
   const marginBottom = '2rem';
   const display = 'block';
 
+  // ВАЖНО: JSON.stringify(undefined) => undefined (и это валит JSONInput внутри Strapi)
+  // Поэтому stringify только от объекта (safeValue/location)
+  const jsonValue = JSON.stringify(location ?? safeValue ?? DEFAULT_LOCATION, null, 2);
+
+  const center =
+    safeValue?.lat != null && safeValue?.lng != null
+      ? ([safeValue?.lat, safeValue?.lng] as LatLngTuple)
+      : (mapProps.center as LatLngTuple);
+
   return (
     <Box>
       <Typography variant="delta" style={{ marginBottom, display }}>
-        <PluginIcon style={{width: "3rem", height:"3rem"}}/>
-        {' '}{props.label} v {version}
+        <PluginIcon style={{ width: '3rem', height: '3rem' }} />
+        {' '}
+        {props.label} v {version}
       </Typography>
 
       <Typography variant="omega" style={{ marginBottom, display }}>
@@ -149,8 +191,8 @@ const Input: React.FC<InputProps> = (props) => {
       <Box style={{ display: 'flex', height: '300px', width: '100%', marginBottom }}>
         <Box style={{ width: '100% ' }}>
           <MapContainer
-            zoom={ mapProps.zoom}
-            center={ props.value?.lat && props.value?.lng ? [props.value?.lat, props.value?.lng ] :  mapProps.center as LatLngTuple}
+            zoom={mapProps.zoom}
+            center={center}
             ref={setMap}
             style={{ height: '300px', zIndex: 299 }}
           >
@@ -159,7 +201,9 @@ const Input: React.FC<InputProps> = (props) => {
               url={mapProps.tileUrl}
               accessToken={mapProps.tileAccessToken}
             />
-            {location && <Marker position={[location?.lat, location?.lng]} icon={customIcon} />}
+            {location && location?.lat != null && location?.lng != null && (
+              <Marker position={[location?.lat, location?.lng]} icon={customIcon} />
+            )}
           </MapContainer>
         </Box>
       </Box>
@@ -172,7 +216,8 @@ const Input: React.FC<InputProps> = (props) => {
         <JSONInput
           disabled
           name={props.name}
-          value={JSON.stringify(props.value, null, 2)}
+          value={jsonValue}
+          // disabled => onChange всё равно не должен срабатывать; оставляем как было
           onChange={(e: any) => setLocation(e)}
           style={{ height: '9rem' }}
         />
