@@ -95,11 +95,11 @@ const Input = (props) => {
     /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Box, { style: { display: "grid", gridTemplateColumns: "2fr 2fr 1fr", marginBottom }, children: [
       /* @__PURE__ */ jsxRuntime.jsx(designSystem.TextInput, { ref: latRef, name: "lat", placeholder: "Latitude" }),
       /* @__PURE__ */ jsxRuntime.jsx(designSystem.TextInput, { ref: lngRef, name: "lng", placeholder: "Longitude" }),
-      /* @__PURE__ */ jsxRuntime.jsx(designSystem.Button, { variant: "secondary", onClick: setLatLng, size: "l", children: "Set Location" })
+      /* @__PURE__ */ jsxRuntime.jsx(designSystem.Button, { variant: "secondary", onClick: setLatLng, size: "L", children: "Set Location" })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsxs(designSystem.Box, { style: { display: "grid", gridTemplateColumns: "4fr 1fr", marginBottom }, children: [
       /* @__PURE__ */ jsxRuntime.jsx(designSystem.TextInput, { ref: searchRef, name: "search", placeholder: "Address to search" }),
-      /* @__PURE__ */ jsxRuntime.jsx(designSystem.Button, { variant: "secondary", onClick: searchLocation, size: "l", children: "Search" })
+      /* @__PURE__ */ jsxRuntime.jsx(designSystem.Button, { variant: "secondary", onClick: searchLocation, size: "L", children: "Search" })
     ] }),
     /* @__PURE__ */ jsxRuntime.jsx(designSystem.Box, { style: { display: "flex", height: "300px", width: "100%", marginBottom }, children: /* @__PURE__ */ jsxRuntime.jsx(designSystem.Box, { style: { width: "100% " }, children: /* @__PURE__ */ jsxRuntime.jsxs(
       reactLeaflet.MapContainer,
